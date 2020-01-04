@@ -192,19 +192,10 @@ public class Dispoverwaltung {
 
         for(Box box: this.emptyBoxList){
             for(Bpd d : this.bpdispo){
-                
-                while(box.getR()<100){
-                    found = false;
-                    for(Bpd d : this.bpdispo){
-                        if((d.getAlgrad()<box.getR())&&box.compatible(d.getTtyp())){
-                            disp = d;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if(found){
+                if(d.getAlgrad()<100 && box.compatible(d.getTtyp())){
+                    
+                }else{
 
-                    }
                 }
             }
 
