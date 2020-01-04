@@ -193,7 +193,10 @@ public class Dispoverwaltung {
 
         for(Box box: this.emptyBoxList){
             for(Bpd d : this.bpdispo){
-                if(box.compatible(d.getTtyp())){
+                if(
+                        (box.compatible(d.getTtyp()))
+                        &&(d.getVerpackt() == false)
+                ){
                     if(d.getAlgrad() < box.getR()){
                         d.setVerpackt(true);
                         box.setR(box.getR() - d.getAlgrad());
@@ -204,15 +207,18 @@ public class Dispoverwaltung {
                                         d.getMenge()
                                 )
                         );
-                        dispoBoxList.addLast(box);
                     }
                 }
-
             }
-
-
-
+            if(box.getR()<100){
+                dispoBoxList.addLast(box);
+            }
         }
+
+        for(Bpd d : bpdispo){
+            if(d.getAlgrad()>100)
+        }
+
 
         //Einfügen des Bestellstatus
         SQL = "update \"BESTELLUNG\" set status = 2 where bestnr = ?";

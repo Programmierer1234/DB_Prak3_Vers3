@@ -1,5 +1,8 @@
 package Zettel3;
 
 public enum Transporttyp {
-    OR, FR, WP, FW
+    OR, //Ordinary (0)
+    FR, //Fragile (1)
+    WP, //Waterprof (2)
+    FW //Fragile and Waterprof (3)
 }

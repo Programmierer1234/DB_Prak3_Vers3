@@ -4,11 +4,11 @@ public class Stock {
     int artnr, lnr, stuecke, wert, bstnr;
 
     public Stock(int artnr, int lnr, int stuecke, int wert, int bstnr) {
-        this.artnr = artnr;
-        this.lnr = lnr;
-        this.stuecke = stuecke;
-        this.wert = wert;
-        this.bstnr = bstnr;
+        this.artnr = artnr; //Artikelnummer
+        this.lnr = lnr; //Lagernummer
+        this.stuecke = stuecke; //Stueckzahl des Artikels
+        this.wert = wert; // Warenwert des Artikels
+        this.bstnr = bstnr; // Bestandnummer
     }
 
     public int getArtnr() {

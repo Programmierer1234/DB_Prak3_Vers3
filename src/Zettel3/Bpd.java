@@ -124,4 +124,7 @@ public class Bpd implements Comparable<Bpd> {
     public void setVerpackt(boolean verpackt) {
         this.verpackt = verpackt;
     }
+
+    public boolean getVerpackt(){ return this.verpackt;}
+
 }

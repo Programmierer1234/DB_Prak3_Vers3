@@ -8,11 +8,11 @@ public class Box implements Comparable<Box> {
     Transporttyp vbtyp;
 
     public Box(int vbnr,String vbtyp) {
-        this.R = 100;
-        this.vbnr = vbnr;
-        this.vstat = 0;
-        this.vbstnr = 0;
-        this.vbtyp = Transporttyp.valueOf(vbtyp);
+        this.R = 100;  //Prozentualler Restfuellwert
+        this.vbnr = vbnr; //Boxnummer
+        this.vstat = 0; //Box Status
+        this.vbstnr = 0; // Betandsnummer
+        this.vbtyp = Transporttyp.valueOf(vbtyp); //Boxtranstporttyp
     }
 
     @Override
