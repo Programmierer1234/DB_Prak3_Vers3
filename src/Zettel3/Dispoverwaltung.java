@@ -186,17 +186,29 @@ public class Dispoverwaltung {
         String SQL;
         Box filledBox;
         LinkedList<Box> dispoBoxList = new LinkedList<>();
+        LinkedList<Packlist> packlist = new LinkedList<>();
         PreparedStatement ps;
         Bpd disp;
         boolean found = false;
 
         for(Box box: this.emptyBoxList){
             for(Bpd d : this.bpdispo){
-                if(d.getAlgrad()<100 && box.compatible(d.getTtyp())){
-                    
-                }else{
+                if(box.compatible(d.getTtyp())){
+                    if(d.getAlgrad()<box.getR()){
+                        d.setVerpackt(true);
+                        box.setR(box.getR() - d.getAlgrad());
+                        packlist.addLast(
+                                new Packlist(
+                                        d.getBstnr(),
+                                        box.getVbnr(),
+                                        d.getMenge()
+                                )
+                        );
 
+                        dispoBoxList.addLast(box);
+                    }
                 }
+
             }
 
 

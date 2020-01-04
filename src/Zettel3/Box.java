@@ -6,7 +6,6 @@ public class Box implements Comparable<Box> {
 
     int R, vbnr, vstat, vbstnr;
     Transporttyp vbtyp;
-    LinkedList<Packlist> packlist;
 
     public Box(int vbnr,String vbtyp) {
         this.R = 100;
@@ -14,7 +13,6 @@ public class Box implements Comparable<Box> {
         this.vstat = 0;
         this.vbstnr = 0;
         this.vbtyp = Transporttyp.valueOf(vbtyp);
-        this.packlist = new LinkedList<>();
     }
 
     @Override
@@ -80,11 +78,4 @@ public class Box implements Comparable<Box> {
         this.vbstnr = vbstnr;
     }
 
-    public LinkedList<Packlist> getPacklist() {
-        return packlist;
-    }
-
-    public void setPacklist(LinkedList<Packlist> packlist) {
-        this.packlist = packlist;
-    }
 }
