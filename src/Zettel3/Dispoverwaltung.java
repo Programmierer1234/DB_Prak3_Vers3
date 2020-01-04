@@ -187,25 +187,29 @@ public class Dispoverwaltung {
         Box filledBox;
         LinkedList<Box> dispoBoxList = new LinkedList<>();
         PreparedStatement ps;
-        boolean foundBox;
         Bpd disp;
+        boolean found = false;
 
         for(Box box: this.emptyBoxList){
-            while(box.getR()<100){
-                for(Bpd d : this.bpdispo){
-                    if((d.getAlgrad()<box.getR())&&box.compatible(d.getTtyp())){
-                        foundBox = true;
-                        disp = d;
-                        break;
-                    }else {
-                        foundBox = false;
+            for(Bpd d : this.bpdispo){
+                
+                while(box.getR()<100){
+                    found = false;
+                    for(Bpd d : this.bpdispo){
+                        if((d.getAlgrad()<box.getR())&&box.compatible(d.getTtyp())){
+                            disp = d;
+                            found = true;
+                            break;
+                        }
                     }
+                    if(found){
 
-                }
-                if(foundBox = false){
-                    throw SQLException("Zur Disposition "  + )
+                    }
                 }
             }
+
+
+
         }
 
         //Einfügen des Bestellstatus
