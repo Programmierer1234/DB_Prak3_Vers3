@@ -194,7 +194,7 @@ public class Dispoverwaltung {
         for(Box box: this.emptyBoxList){
             for(Bpd d : this.bpdispo){
                 if(box.compatible(d.getTtyp())){
-                    if(d.getAlgrad()<box.getR()){
+                    if(d.getAlgrad() < box.getR()){
                         d.setVerpackt(true);
                         box.setR(box.getR() - d.getAlgrad());
                         packlist.addLast(
@@ -204,7 +204,6 @@ public class Dispoverwaltung {
                                         d.getMenge()
                                 )
                         );
-
                         dispoBoxList.addLast(box);
                     }
                 }
