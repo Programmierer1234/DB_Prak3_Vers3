@@ -1,8 +1,10 @@
 package Zettel3;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Bpd_Verwaltung
@@ -216,7 +218,7 @@ public class Dispoverwaltung {
         }
 
         for(Bpd d : bpdispo){
-            if(d.getAlgrad()>100)
+//            if(d.getAlgrad()>100)
         }
 
 
@@ -261,6 +263,61 @@ public class Dispoverwaltung {
 
 
 
+    }
+
+    //helper method
+    private static Packlist packBoxAndCreateNewPacklist(Bpd bpd, Box box, int vMenge) {
+        bpd.setVerpackt(true);
+        box.setR(box.getR() - bpd.getAlgrad());
+        //TODO what must we do with PackList in this case???
+        return new Packlist(bpd.getBstnr(), box.getVbnr(), vMenge);
+    }
+
+
+    //Input: Liste mit Bpd-Instanzen
+    public void easyMachineDisposition_2(List<Bpd> bpdList) throws SQLException {
+        //We dont need to do anythink, if we dont have empty boxes or some bpds
+        if(this.emptyBoxList.isEmpty() || bpdList.isEmpty()) {
+            return;
+        }
+        for(int i = 0; i < bpdList.size(); i++) {
+            Bpd bpd = bpdList.get(i);
+             //d1 + d2
+            if(bpd.getAlgrad() < 100) {
+                //We have to initializize first an empty box, because we need to check, if its the first time we are running it
+                Box box = null;
+                if(box == null) {
+                    box = searchEmptyBox(bpd.getTtyp().toString());
+                    if(box == null) {
+                        //fixme should we really do nothing, if there is suitable box ?
+                        continue;
+                    }
+                }
+                if(bpd.getAlgrad() < box.getR()) {
+                    packBoxAndCreateNewPacklist(bpd, box, bpd.getMenge());
+                }
+            } else { //bpd.getAlgrad() >= 100
+                int anzBOX = bpd.getAlgrad() / 100 + 1;
+                List<Packlist> packlists = new ArrayList<>();
+                for(int j = 0; j < anzBOX; j++) {
+                    int vMenge;
+                    //Calculation of vMenge. We need this, because we have later to take the case into account, if vMenge == 0
+                    if(j < anzBOX - 1) {
+                        vMenge = bpd.getMenge()/anzBOX;
+                    } else {
+                        vMenge = bpd.getMenge()%anzBOX;
+                    }
+                    if(vMenge > 0) {
+                        Box box = searchEmptyBox(bpd.getTtyp().toString());
+                        if(box == null) {
+                            //fixme should we really do nothing, if there is suitable box ?
+                            break;
+                        }
+                        packBoxAndCreateNewPacklist(bpd, box, vMenge);
+                    }
+                }
+            }
+        }
     }
 
     /**

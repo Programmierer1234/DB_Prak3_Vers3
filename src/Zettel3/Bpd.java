@@ -8,16 +8,17 @@ package Zettel3;
  Beschreibung:
  Die Klasse stellt die Disposition zu einem Bestand einer Bestellung dar.
  */
+//vmtl. BoxPerDispo
 public class Bpd implements Comparable<Bpd> {
-    private int bstnr;
-    private int artnr;
-    private int anzbo;
-    private int menge;
-    private int algrad;
-    private String artbez;
+    private int bstnr; //bestellnummer
+    private int artnr; //artikelnummer
+    private int anzbo; //anzahlbo????
+    private int menge; //vmtl. menge von boxen
+    private int algrad; //auslastungsgrad des arktikels in einer box in prozent
+    private String artbez; //artikelBezeichnung
 
-    private Transporttyp ttyp;
-    private boolean verpackt;
+    private Transporttyp ttyp; //transportTyp
+    private boolean verpackt;  //istVerpackt
 
 
     public Bpd(int bstnr, String ttyp,
