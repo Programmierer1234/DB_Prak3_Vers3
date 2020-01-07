@@ -42,8 +42,8 @@ public class Box implements Comparable<Box> {
         return vbtyp;
     }
 
-    public void setVbtyp(Transporttyp ttyp) {
-        this.vbtyp = ttyp;
+    public void setVbtyp(String ttyp) {
+        this.vbtyp = Transporttyp.valueOf(ttyp);
     }
 
     public int getR() {
