@@ -1,10 +1,14 @@
 package Zettel3;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 
 
 
 public class DeliveryNote {
+    java.sql.Date bestdat;
     int knr = 0;                    //Gemeinsam: Bestellungen und Kunde
     int status = 0, bestnr = 0;     //Attribute für Bestellung
     String kname, ort, strasse;     //Attribute für Kunden
@@ -16,14 +20,15 @@ public class DeliveryNote {
     int anzBoxFr;
     int anzBoxWp;
     int anzBoxFw;
-    int anzBoxWithWeakerTranportCondition;
+    int anztypfremd;
 
 
 
-    public DeliveryNote(int knr, int status,
+    public DeliveryNote(java.sql.Date bestdat, int knr, int status,
                         int bestnr, String kname,
                         String ort, String strasse,
                         int plz) {
+        this.bestdat = bestdat;
         this.knr = knr;
         this.status = status;
         this.bestnr = bestnr;
@@ -49,43 +54,78 @@ public class DeliveryNote {
         this.alleLpos2boxes.addLast(l);
     }
 
-    public void calcAnzBoxes(){
-        Transporttyp typ;
-        for(Box b: this.alleBoxen){
-            typ = b.getVbtyp();
 
-            if(typ == Transporttyp.OR){
-                this.anzBoxOr++;
-            }
-            else if(typ == Transporttyp.FR){
-                this.anzBoxFr++;
-            }
-            else if(typ == Transporttyp.WP){
-                this.anzBoxWp++;
-            }
-            else if(typ == Transporttyp.FW){
-                this.anzBoxFw++;
-            }
 
+    @Override
+    public String toString(){
+
+        StringBuilder s = new StringBuilder();
+        String tmp =
+                "-----------Lieferschein-----------" +
+                        "\nBestellungsdaten:" +
+                        "\nBestellnummer:       " + this.bestnr +
+                        "\nBestelldatum:        " + this.bestdat +
+                        "\nKundennummer:        " + this.knr +
+                        "\nSatus:               " + this.status +
+                        "\n\n-----------Kunde-----------" +
+                        "\nKundennummer:        " + this.knr +
+                        "\nName:                " + this.kname +
+                        "\nPLZ:                 " + this.plz +
+                        "\nOrt:                 " + this.ort +
+                        "\nStrasse:             " + this.strasse;
+
+        s.append(tmp);
+
+        s.append("\n\n-----------Lagerbestand-----------");
+        for(Stock stock : this.alleBaestaende){
+            s.append(stock.toString());
         }
-    }
 
+        String anzBoxen = "\n\n-----------Boxtypen und deren Anzahl-----------" +
+                "\nOR:                  " + this.anzBoxOr +
+                "\nFR:                  " + this.anzBoxFr +
+                "\nWP:                  " + this.anzBoxWp +
+                "\nFW:                  " + this.anzBoxFw +
+                "\nAnz typfremd:        " + this.anztypfremd;
+
+        s.append(anzBoxen);
+
+        s.append("\n\n-----------Packlsite-----------");
+        for(Lpos2box l : this.alleLpos2boxes){
+            s.append(l.toString());
+        }
+
+        return s.toString();
+
+    }
 
 
     //NOCH ZU IMPLEMENTIEREN
     public void printToConole(){
-        String text =
-                "Lieferschein:" +
-                        "       Bestellungsdaten:" +
-                        "       Bestelldatum: " + this.
+        System.out.println(this.toString());
     }
     public void printToText(){
+        String filename = "LIEF" + this.bestnr;
+        try{
+            FileWriter fw = new FileWriter(filename, false);
+            PrintWriter pw = new PrintWriter(fw);
 
+            pw.println(this.toString());
+
+            pw.close();
+            fw.close();
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
     public void printToXml(){
+        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 
+        DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
+
+        Document document = documentBuilder.newDocument();
     }
-
 
 
 

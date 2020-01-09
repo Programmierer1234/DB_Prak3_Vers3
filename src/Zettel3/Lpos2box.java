@@ -12,6 +12,16 @@ public class Lpos2box {
     }
 
 
+    @Override
+    public String toString(){
+        String s =
+                "\nID:                      " + this.b2bnr +
+                "\nBestandsnummer:          " + this.bstnr +
+                "\nBoxnummer:               " + this.vbnr +
+                "\nMenge:                   " + this.vmenge;
+
+        return s;
+    }
 
     public int getB2bnr() {
         return b2bnr;

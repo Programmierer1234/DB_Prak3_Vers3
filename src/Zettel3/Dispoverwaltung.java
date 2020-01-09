@@ -343,13 +343,12 @@ public class Dispoverwaltung {
         DeliveryNote deliveryNote;
 
         PreparedStatement ps = this.postgres.getConnection().prepareStatement(SQL);
-
         ps.setInt(1, bestnr);
-
         resultSet = ps.executeQuery();
 
         if(resultSet.next()){
             deliveryNote = new DeliveryNote(
+                    resultSet.getDate("bestdat"),
                     resultSet.getInt("knr"),
                     resultSet.getInt("status"),
                     resultSet.getInt("bestnr"),
@@ -382,14 +381,13 @@ public class Dispoverwaltung {
                     resultSet.getInt("wert"),
                     resultSet.getInt("bstnr")));
         }
+        resultSet.close();
+        ps.close();
 
         //Laden der Boxen
         SQL = "select * from box b where vbstnr = ?";
-
         ps = this.postgres.getConnection().prepareStatement(SQL);
-
         ps.setInt(1, bestnr);
-
         resultSet = ps.executeQuery();
 
         Box b;
@@ -401,6 +399,8 @@ public class Dispoverwaltung {
             b.setVbtyp(resultSet.getString("vbtyp"));
             deliveryNote.addBox(b);
         }
+        resultSet.close();
+        ps.close();
 
 
         //Laden der Zuordnung lpos2Box
@@ -410,11 +410,8 @@ public class Dispoverwaltung {
                 "on l.bestnr = ?";
 
         ps = this.postgres.getConnection().prepareStatement(SQL);
-
         ps.setInt(1, bestnr);
-
         resultSet = ps.executeQuery(SQL);
-
 
         while(resultSet.next()){
             deliveryNote.addLp2b(new Lpos2box(
@@ -424,8 +421,16 @@ public class Dispoverwaltung {
                     resultSet.getInt("vmenge")
             ));
         }
+        resultSet.close();
+        ps.close();
 
-        deliveryNote.calcAnzBoxes();
+        SQL = "select b.vbtyp, count(b.vbtyp) as Anz\n" +
+                "from box b\n" +
+                "where b.vstat = 1\n" +
+                "group by b.vbtyp";
+
+        ps = this.postgres.getConnection().prepareStatement();
+        ps.setInt(1, bestnr);
 
         /*
 

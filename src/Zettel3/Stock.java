@@ -11,6 +11,18 @@ public class Stock {
         this.bstnr = bstnr; // Bestandnummer
     }
 
+    @Override
+    public String toString(){
+        String stock =
+                "\n\nBestandnummer:       " + this.bstnr +
+                "\nArtikelnummer:       " + this.artnr +
+                "\nLagernummer:         " + this.lnr +
+                "\nStueckzahl:          " + this.stuecke +
+                "\nWarenwert:           " + this.wert ;
+
+        return stock;
+    }
+
     public int getArtnr() {
         return artnr;
     }
