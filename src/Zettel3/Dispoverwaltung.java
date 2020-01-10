@@ -333,6 +333,14 @@ public class Dispoverwaltung {
 
     public void createDeliveryNoteFor(int bestnr)throws SQLException{
 
+        Customer customer;
+        Order order;
+        LinkedList<Stock> alleBaestaende = new LinkedList<>();
+        LinkedList<Lpos2box> alleLpos2boxes = new LinkedList<>();
+        LinkedList<Box> alleBoxen = new LinkedList<>();
+        Boxtypecounter boxtypecounter;
+
+
         //Laden von Bestelldaten und Kunden
         String SQL = "select b.bestdat, b.bestnr, b.status, k.knr, k.kname, k.ort, k.plz, k.strasse\n" +
                 "from \"BESTELLUNG\" b\n" +
@@ -340,22 +348,28 @@ public class Dispoverwaltung {
                 "on k.knr = b.knr\n" +
                 "where status = 2 and b.bestnr = ?";
         ResultSet resultSet;
-        DeliveryNote deliveryNote;
 
         PreparedStatement ps = this.postgres.getConnection().prepareStatement(SQL);
         ps.setInt(1, bestnr);
         resultSet = ps.executeQuery();
 
         if(resultSet.next()){
-            deliveryNote = new DeliveryNote(
+
+            customer = new Customer(
+                    resultSet.getInt("knr"),
+                    resultSet.getString("kname"),
+                    resultSet.getString("strasse"),
+                    resultSet.getInt("plz"),
+                    resultSet.getString("ort")
+                    );
+
+            order = new Order(
                     resultSet.getDate("bestdat"),
                     resultSet.getInt("knr"),
                     resultSet.getInt("status"),
-                    resultSet.getInt("bestnr"),
-                    resultSet.getString("kname"),
-                    resultSet.getString("ort"),
-                    resultSet.getString("strasse"),
-                    resultSet.getInt("plz"));
+                    resultSet.getInt("bestnr")
+            );
+
             resultSet.close();
             ps.close();
         }else{
@@ -374,7 +388,7 @@ public class Dispoverwaltung {
         resultSet = ps.executeQuery();
 
         while(resultSet.next()){
-            deliveryNote.addBestand(new Stock(
+            alleBaestaende.addLast(new Stock(
                     resultSet.getInt("artnr"),
                     resultSet.getInt("lnr"),
                     resultSet.getInt("stuecke"),
@@ -384,37 +398,39 @@ public class Dispoverwaltung {
         resultSet.close();
         ps.close();
 
-        //Laden der Boxen
+
+        //Laden der Boxen mit der Bestellnummer = ?
         SQL = "select * from box b where vbstnr = ?";
         ps = this.postgres.getConnection().prepareStatement(SQL);
         ps.setInt(1, bestnr);
         resultSet = ps.executeQuery();
 
-        Box b;
-
         while(resultSet.next()){
-            b = new Box(resultSet.getInt("vbnr"),
-                    resultSet.getString("vbtyp"));
-            b.setVbstnr(resultSet.getInt("vbstnr"));
-            b.setVbtyp(resultSet.getString("vbtyp"));
-            deliveryNote.addBox(b);
+            alleBoxen.addLast(new Box(
+                    0,
+                    resultSet.getInt("vbnr"),
+                    resultSet.getInt("vstat"),
+                    resultSet.getInt("vbstnr"),
+                    resultSet.getString("vbtyp")));
         }
         resultSet.close();
         ps.close();
 
-
         //Laden der Zuordnung lpos2Box
-        SQL = "select lb.b2bnr, lb.bstnr, lb.vbnr, lb.vmenge \n" +
-                "from lpos2box lb \n" +
-                "join \"LAGERBESTAND\" l\n" +
-                "on l.bestnr = ?";
+        SQL = "select *\n" +
+                "from lpos2box lb\n" +
+                "where exists(\n" +
+                "\tselect *\n" +
+                "\tfrom \"LAGERBESTAND\" l\n" +
+                "\twhere l.bestnr = ? and lb.bstnr = l.bstnr\n" +
+                ")";
 
         ps = this.postgres.getConnection().prepareStatement(SQL);
         ps.setInt(1, bestnr);
         resultSet = ps.executeQuery(SQL);
 
         while(resultSet.next()){
-            deliveryNote.addLp2b(new Lpos2box(
+            alleLpos2boxes.addLast(new Lpos2box(
                     resultSet.getInt("b2bnr"),
                     resultSet.getInt("bstnr"),
                     resultSet.getInt("vbnr"),
@@ -426,35 +442,38 @@ public class Dispoverwaltung {
 
         SQL = "select b.vbtyp, count(b.vbtyp) as Anz\n" +
                 "from box b\n" +
-                "where b.vstat = 1\n" +
+                "where vbstnr = ?\n" +
                 "group by b.vbtyp";
 
-        ps = this.postgres.getConnection().prepareStatement();
+        ps = this.postgres.getConnection().prepareStatement(SQL);
         ps.setInt(1, bestnr);
 
-        /*
+        resultSet = ps.executeQuery();
 
-        for(Box box : deliveryNote.getAlleBoxen()){
-            SQL = "select b.vbtyp, a.ttyp\n" +
-                    "from box b, \"ARTIKEL\" a, \"LAGERBESTAND\" l\n" +
-                    "where l.bestnr = ? and b.vbnr = ?";
+        boxtypecounter = new Boxtypecounter();
 
-            ps = this.postgres.getConnection().prepareStatement(SQL);
-
-            ps.setInt(1, bestnr);
-
-            ps.setInt(2, box.getVbnr());
-*/
-
+        if(resultSet.next()){
+           boxtypecounter.setAnzBoxFr(resultSet.getInt("anz"));
+        }
+        if(resultSet.next()){
+            boxtypecounter.setAnzBoxFw(resultSet.getInt("anz"));
+        }
+        if(resultSet.next()){
+            boxtypecounter.setAnzBoxOr(resultSet.getInt("anz"));
+        }
+        if(resultSet.next()){
+            boxtypecounter.setAnzBoxWp(resultSet.getInt("anz"));
         }
 
+        DeliveryNote deliveryNote = new DeliveryNote(order, customer, alleBaestaende, alleLpos2boxes, alleBoxen, boxtypecounter);
 
+        deliveryNote.printToConole();
 
-
-
-
-
-
+        deliveryNote.printToText();
+        
     }
 
+
+
 }
+

@@ -14,7 +14,8 @@ public class Stock {
     @Override
     public String toString(){
         String stock =
-                "\n\nBestandnummer:       " + this.bstnr +
+                "\n\n-----------Lagerbestand-----------" +
+                "\nBestandnummer:       " + this.bstnr +
                 "\nArtikelnummer:       " + this.artnr +
                 "\nLagernummer:         " + this.lnr +
                 "\nStueckzahl:          " + this.stuecke +

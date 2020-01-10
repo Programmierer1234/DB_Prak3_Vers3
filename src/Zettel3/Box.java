@@ -4,20 +4,31 @@ import java.util.LinkedList;
 
 public class Box implements Comparable<Box> {
 
-    int R, vbnr, vstat, vbstnr;
+    int R, vbnr, vstat, vbestnr;
     Transporttyp vbtyp;
 
-    public Box(int vbnr,String vbtyp) {
-        this.R = 100;  //Prozentualler Restfuellwert
-        this.vbnr = vbnr; //Boxnummer
-        this.vstat = 0; //Box Status
-        this.vbstnr = 0; // Betandsnummer
-        this.vbtyp = Transporttyp.valueOf(vbtyp); //Boxtranstporttyp
+    public Box(int r, int vbnr, int vstat, int vbestnr, String vbtyp) {
+        R = r;
+        this.vbnr = vbnr;
+        this.vstat = vstat;
+        this.vbestnr = vbestnr;
+        this.vbtyp = Transporttyp.valueOf(vbtyp);
     }
 
     @Override
     public int compareTo(Box o) {
         return (this.vbtyp.compareTo(o.getVbtyp())*(-1)); //negativ, wenn this größer
+    }
+
+    @Override
+    public String toString(){
+        String s = "\n\n-----------Box-----------" +
+                "\nBoxnummer:               " + this.vbnr +
+                "\nStatus:                  " + this.vstat +
+                "\nBestellnummer:           " + this.vbestnr +
+                "\nTransporttyp:            " + this.vbtyp.toString();
+
+        return s;
     }
 
     public void print(){
@@ -71,11 +82,11 @@ public class Box implements Comparable<Box> {
     }
 
     public int getVbstnr() {
-        return vbstnr;
+        return vbestnr;
     }
 
-    public void setVbstnr(int vbstnr) {
-        this.vbstnr = vbstnr;
+    public void setVbstnr(int vbestnr) {
+        this.vbestnr = vbestnr;
     }
 
 }
