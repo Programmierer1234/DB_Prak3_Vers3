@@ -12,7 +12,7 @@ package Zettel3;
 public class Bpd implements Comparable<Bpd> {
     private int bstnr; //bestellnummer
     private int artnr; //artikelnummer
-    private int anzbo; //anzahlbo????
+    private int anzbo; //anzahl der Boxen, die in eine Box passen
     private int menge; //vmtl. menge von boxen
     private int algrad; //auslastungsgrad des arktikels in einer box in prozent
     private String artbez; //artikelBezeichnung

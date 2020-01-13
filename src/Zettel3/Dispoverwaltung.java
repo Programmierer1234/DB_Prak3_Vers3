@@ -15,6 +15,7 @@ import java.util.List;
 public class Dispoverwaltung {
 
     private static Dispoverwaltung ourInstance;
+    private Typfremd anztypFremd;
     private PostgresJDBC postgres;
     private LinkedList<Box> emptyBoxList;
     private LinkedList<Bpd> bpdispo;
@@ -23,6 +24,7 @@ public class Dispoverwaltung {
     private Dispoverwaltung() {
         this.bpdispo = new LinkedList<>();
         this.emptyBoxList = new LinkedList<>();
+        this.anztypFremd = new Typfremd();
     }
 
     public static Dispoverwaltung getInstance() {
@@ -48,7 +50,7 @@ public class Dispoverwaltung {
         ResultSet RS;
 
         // Eine SQL Select Anweisung
-        SQL = "select bestdat, bestnr, status from \"BESTELLUNG\" b where b.status = 1";
+        SQL = "select bestdat, bestnr, status from \"BESTELLUNG\" b where b.status = 1 order by b.bestnr";
         // SQL-Anweisung ausführen und Ergebnis in ein ResultSet schreiben
         RS = Stmt.executeQuery(SQL);
 
@@ -185,7 +187,7 @@ public class Dispoverwaltung {
      */
     public void easyMachineDisposition() throws SQLException {
 
-        int anzBOX, algrad, menge, vmenge, vmengeLast;
+        int anzBOX, vmenge, vmengeLast;
         String SQL, fehler;
         Box box2;
         int k;
@@ -195,8 +197,8 @@ public class Dispoverwaltung {
         LinkedList<Box> emtyBoxListClone = new LinkedList<>(this.emptyBoxList);
         Box box;
         PreparedStatement ps;
-        Bpd disp;
-        boolean found = false;
+
+        this.anztypFremd.setAnzTypfremd(0);
 
         if(this.emptyBoxList.isEmpty() || this.bpdispo.isEmpty()){
             throw new SQLException("Keine Boxen oder Bestände zum disponieren vohanden!");
@@ -205,25 +207,26 @@ public class Dispoverwaltung {
         for(int i = emptyBoxList.size()-1; i >= 0; i--){
             box = emptyBoxList.get(i);
             for(Bpd d : bpdispo){
-                if(box.compatible(d.getTtyp())&&(!d.getVerpackt())){
+                if(box.compatible(d,this.anztypFremd)&&(!d.getVerpackt())&&(box.isVerpackt()==false)){
                     if(box == null){
                         fehler = "Nicht genug Boxen mit der Transportbedingung " + d.getTtyp() + " vorhanden!";
                         throw new SQLException(fehler);
                     }
-                    if(d.getAlgrad()<100){
+                    if(d.getAlgrad()<100){ //Bestand passt in die Kiste
                         //Abfuellen der Box
                         d.setVerpackt(true);
                         box.setR(100-d.getAlgrad());
                         packlist.addLast(new Packlist(d.getBstnr(), box.getVbnr(), d.getMenge()));
                         //Suchen nach einem weiteren Bestand, der abgefuellt werden kann
                         for(Bpd d2 : bpdispo){
-                            if(d2.getAlgrad()<box.getR()&& (!d2.getVerpackt())){
+                            if(d2.getAlgrad()<box.getR()&& (d2.getVerpackt()==false)){
+                                d2.setVerpackt(true);
                                 box.setR(box.getR()-d2.getAlgrad());
                                 packlist.addLast(new Packlist(d2.getBstnr(), box.getVbnr(), d.getMenge()));
                             }
+
                         }
-                        emtyBoxListClone.remove(box);
-                        fullBoxList.addLast(box);
+                        box.setVerpackt(true);
                     }
                     else{
                         //Berechnen der erforderlichen Boxen
@@ -231,30 +234,37 @@ public class Dispoverwaltung {
                         vmenge = d.getMenge()/anzBOX;
                         vmengeLast = vmenge%anzBOX;
 
-                        emtyBoxListClone.remove(box);
-                        fullBoxList.addLast(box);
+                        box.setVerpackt(true);
                         packlist.addLast(new Packlist(d.getBstnr(), box.getVbnr(), vmenge));
 
-                        for(k = i-1; k > (i-anzBOX) ; k--){
+                        for(k = i-1; k > (i-anzBOX) ; k--){//Rückwerts durch die Boxliste
                             box2 = emptyBoxList.get(k);
-                            if(box2 == null || (!box2.compatible(d.getTtyp()))||(k-1<0)){
+                            if(box2 == null || (!box2.compatible(d,this.anztypFremd))||(k-1<0)){
                                 fehler = "Nicht genug Boxen mit der Transportbedingung " + d.getTtyp() + " vorhanden!";
                                 throw new SQLException(fehler);
                             }
-                            fullBoxList.addLast(box2);
-                            emtyBoxListClone.remove(box2);
-                            packlist.addLast(new Packlist(d.getBstnr(), box2.getVbnr(), vmenge));
+                            if(box2.isVerpackt()==false){
+                                fullBoxList.addLast(box2);
+                                emtyBoxListClone.remove(box2);
+                                packlist.addLast(new Packlist(d.getBstnr(), box2.getVbnr(), vmenge));
+                                box2.setVerpackt(true);
+                            }
+
                         }
 
                         if(vmengeLast != 0){
                             box2 = emptyBoxList.get(k);
-                            if(box2 == null || !box2.compatible(d.getTtyp())){
+                            if(box2 == null || !box2.compatible(d,this.anztypFremd)){
                                 fehler = "Nicht genug Boxen mit der Transportbedingung " + d.getTtyp() + " vorhanden!";
                                 throw new SQLException(fehler);
                             }
-                            fullBoxList.addLast(box2);
-                            emtyBoxListClone.remove(box2);
-                            packlist.addLast(new Packlist(d.getBstnr(), box2.getVbnr(), vmengeLast));
+                            if(box2.isVerpackt()==false){
+                                fullBoxList.addLast(box2);
+                                emtyBoxListClone.remove(box2);
+                                packlist.addLast(new Packlist(d.getBstnr(), box2.getVbnr(), vmengeLast));
+                                box2.setVerpackt(true);
+                            }
+
                         }
                         d.setVerpackt(true);
                     }
@@ -293,14 +303,17 @@ public class Dispoverwaltung {
         }
 
         //Update der Box Tabelle
-        for(Box o : fullBoxList){
-            SQL = "update box set vstat = 1, vbstnr = ? where vbnr = ?";
-            ps = this.postgres.getConnection().prepareStatement(SQL);
-            ps.setInt(1, bestnr);
-            ps.setInt(2, o.getVbnr());
-            ps.executeUpdate();
-            ps.close();
-            System.out.println("Box " + o.getVbnr()+" aktuallisiert: vstat = 1, vbstnr = "+bestnr);
+        for(Box o : this.emptyBoxList){
+            if(o.isVerpackt()){
+                SQL = "update box set vstat = 1, vbstnr = ? where vbnr = ?";
+                ps = this.postgres.getConnection().prepareStatement(SQL);
+                ps.setInt(1, bestnr);
+                ps.setInt(2, o.getVbnr());
+                ps.executeUpdate();
+                ps.close();
+                System.out.println("Box " + o.getVbnr()+" aktuallisiert: vstat = 1, vbstnr = "+bestnr);
+            }
+
         }
 
     }
@@ -310,11 +323,27 @@ public class Dispoverwaltung {
     public void showScheduledOrders() throws SQLException{
         java.sql.Date bestdat;
         int knr = 0, status = 0, bestnr = 0;
+        Order tmpOrder;
 
         String SQL = "select * from \"BESTELLUNG\" b where status = 2";
         ResultSet resultSet;
         PreparedStatement ps = this.postgres.getConnection().prepareStatement(SQL);
         resultSet = ps.executeQuery();
+
+        if(resultSet.next()){
+            bestdat = resultSet.getDate("bestDat");
+            knr = resultSet.getInt("knr");
+            status = resultSet.getInt("status");
+            bestnr = resultSet.getInt("bestnr");
+
+            System.out.println("Bestellnummer:      " + bestnr);
+            System.out.println("Kundennummer:       " + knr);
+            System.out.println("Bestelldatum:       " + bestdat);
+            System.out.println("Status:             " + status);
+            System.out.println();
+        }else{
+            throw new SQLException("Keine disponierte Bestellung vorhanden!");
+        }
 
         while(resultSet.next()){
             bestdat = resultSet.getDate("bestDat");
@@ -452,6 +481,8 @@ public class Dispoverwaltung {
         resultSet = ps.executeQuery();
 
         boxtypecounter = new Boxtypecounter();
+
+        boxtypecounter.setAnztypfremd(this.anztypFremd.getAnzTypfremd());
 
         while(resultSet.next()){
 

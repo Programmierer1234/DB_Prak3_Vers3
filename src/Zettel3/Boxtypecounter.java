@@ -9,7 +9,6 @@ public class Boxtypecounter {
 
 
     public Boxtypecounter() {
-
     }
 
     @Override

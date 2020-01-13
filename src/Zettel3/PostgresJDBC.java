@@ -328,19 +328,10 @@ public class PostgresJDBC {
                     System.out.println("Sortierte Box Liste:\n");
                     dispoVerwaltung.printEmptyBoxList();
                     dispoVerwaltung.easyMachineDisposition();
-                    deliveryNote = dispoVerwaltung.createDeliveryNoteFor(bestnr);
-                    deliveryNote.printToConole();
-                    deliveryNote.printToText();
-                    deliveryNote.printToXml();
-
                 }catch(SQLException e1) {
                     System.out.println(e1.getMessage());
                 } catch(NumberFormatException e2) {
                     System.out.println("Keine gültige Zahl eingegeben!");
-                } catch (ParserConfigurationException e) {
-                    System.out.println(e.getMessage());
-                } catch (TransformerException e) {
-                    System.out.println(e.getMessageAndLocation());
                 }
 
                 System.out.println("PRESS ENTER TO CONTINUE");
@@ -352,11 +343,18 @@ public class PostgresJDBC {
                     dispoVerwaltung.showScheduledOrders();
                     System.out.println("Bestellnummer: ");
                     bestnr = Integer.parseInt(in.readLine());
-
+                    deliveryNote = dispoVerwaltung.createDeliveryNoteFor(bestnr);
+                    deliveryNote.printToConole();
+                    deliveryNote.printToText();
+                    deliveryNote.printToXml();
                 }catch(SQLException e1){
                     System.out.println(e1.getMessage());
                 }catch(NumberFormatException e2){
                     System.out.println("Keine gültige Eingabe!");
+                } catch (TransformerException e) {
+                    System.out.println(e.getMessageAndLocation());
+                } catch (ParserConfigurationException e) {
+                    System.out.println(e.getMessage());
                 }
 
                 System.out.println("PRESS ENTER TO CONTINUE");

@@ -4,8 +4,9 @@ import java.util.LinkedList;
 
 public class Box implements Comparable<Box> {
 
-    int R, vbnr, vstat, vbestnr;
-    Transporttyp vbtyp;
+    private int R, vbnr, vstat, vbestnr;
+    private boolean verpackt;
+    private Transporttyp vbtyp;
 
     public Box(int r, int vbnr, int vstat, int vbestnr, String vbtyp) {
         R = r;
@@ -13,6 +14,7 @@ public class Box implements Comparable<Box> {
         this.vstat = vstat;
         this.vbestnr = vbestnr;
         this.vbtyp = Transporttyp.valueOf(vbtyp);
+        this.verpackt = false;
     }
 
     @Override
@@ -41,8 +43,13 @@ public class Box implements Comparable<Box> {
         System.out.println();
         */
     }
-    public boolean compatible(Transporttyp ttyp){
-        if(ttyp.compareTo(this.vbtyp)<=0){
+    public boolean compatible(Bpd d, Typfremd anzTypenfremd){
+        if(d.getTtyp().compareTo(this.vbtyp)==0){
+            return true;
+        }else if(d.getTtyp().compareTo(this.vbtyp)<0){
+            if((d.getVerpackt()==false)&&(this.verpackt==false)){
+                anzTypenfremd.setAnzTypfremd(anzTypenfremd.getAnzTypfremd()+1);
+            }
             return true;
         }else{
             return false;
@@ -88,5 +95,26 @@ public class Box implements Comparable<Box> {
     public void setVbstnr(int vbestnr) {
         this.vbestnr = vbestnr;
     }
+
+    public int getVbestnr() {
+        return vbestnr;
+    }
+
+    public void setVbestnr(int vbestnr) {
+        this.vbestnr = vbestnr;
+    }
+
+    public boolean isVerpackt() {
+        return verpackt;
+    }
+
+    public void setVerpackt(boolean verpackt) {
+        this.verpackt = verpackt;
+    }
+
+    public void setVbtyp(Transporttyp vbtyp) {
+        this.vbtyp = vbtyp;
+    }
+
 
 }

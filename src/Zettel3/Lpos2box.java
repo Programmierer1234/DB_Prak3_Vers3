@@ -15,7 +15,7 @@ public class Lpos2box {
     @Override
     public String toString(){
         String s =
-                "\n\n-----------Packlsite-----------" +
+                "\n\n-----------Packliste-----------" +
                 "\nID:                      " + this.b2bnr +
                 "\nBestandsnummer:          " + this.bstnr +
                 "\nBoxnummer:               " + this.vbnr +
