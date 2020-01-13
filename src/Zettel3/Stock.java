@@ -1,7 +1,7 @@
 package Zettel3;
 
 public class Stock {
-    int artnr, lnr, stuecke, wert, bstnr;
+    private int artnr, lnr, stuecke, wert, bstnr;
 
     public Stock(int artnr, int lnr, int stuecke, int wert, int bstnr) {
         this.artnr = artnr; //Artikelnummer

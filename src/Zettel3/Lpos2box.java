@@ -2,7 +2,7 @@ package Zettel3;
 
 public class Lpos2box {
 
-    int b2bnr, bstnr, vbnr, vmenge;
+    private int b2bnr, bstnr, vbnr, vmenge;
 
     public Lpos2box(int id, int bestandsnummer, int boxnummer, int menge){
         this.b2bnr = id;

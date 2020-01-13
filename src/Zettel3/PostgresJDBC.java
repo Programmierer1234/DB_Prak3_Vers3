@@ -1,5 +1,7 @@
 package Zettel3;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
@@ -191,6 +193,7 @@ public class PostgresJDBC {
     public void menue()throws IOException {
         String input;
         int knr = 0,bestnr = 0, artnr = 0, stuecke = 0, bstnr = 0;
+        DeliveryNote deliveryNote;
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
         do {
@@ -325,12 +328,21 @@ public class PostgresJDBC {
                     System.out.println("Sortierte Box Liste:\n");
                     dispoVerwaltung.printEmptyBoxList();
                     dispoVerwaltung.easyMachineDisposition();
+                    deliveryNote = dispoVerwaltung.createDeliveryNoteFor(bestnr);
+                    deliveryNote.printToConole();
+                    deliveryNote.printToText();
+                    deliveryNote.printToXml();
+
                 }catch(SQLException e1) {
                     System.out.println(e1.getMessage());
-                }
-                catch(NumberFormatException e2) {
+                } catch(NumberFormatException e2) {
                     System.out.println("Keine gültige Zahl eingegeben!");
+                } catch (ParserConfigurationException e) {
+                    System.out.println(e.getMessage());
+                } catch (TransformerException e) {
+                    System.out.println(e.getMessageAndLocation());
                 }
+
                 System.out.println("PRESS ENTER TO CONTINUE");
                 in.readLine();
 

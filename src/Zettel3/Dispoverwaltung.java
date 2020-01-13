@@ -123,12 +123,12 @@ public class Dispoverwaltung {
 
     public void createEmptyBoxList() throws SQLException {
         String vbtyp;
-        int vbnr;
+        int vbnr, vbstnr;
 
         this.emptyBoxList.clear();
 
         ResultSet RS;
-        String SQL = "select vbnr,vbtyp from box b where vstat = 0";
+        String SQL = "select vbnr,vbtyp,vbstnr from box b where vstat = 0";
 
         PreparedStatement ps = this.postgres.getConnection().prepareStatement(SQL);
         RS = ps.executeQuery();
@@ -136,7 +136,8 @@ public class Dispoverwaltung {
         while(RS.next()){
             vbtyp = RS.getString("vbtyp");
             vbnr = RS.getInt("vbnr");
-            this.emptyBoxList.addLast(new Box(vbnr,vbtyp));
+            vbstnr = RS.getInt("vbstnr");
+            this.emptyBoxList.addLast(new Box(100, vbnr, 0 ,vbstnr ,vbtyp));
         }
         this.sortBoxesListTopDown();
         RS.close();
@@ -150,7 +151,7 @@ public class Dispoverwaltung {
 
     public void sortBoxesListTopDown(){ Collections.sort(this.emptyBoxList); }
 
-    public void printBpdispo(){ //NICH FUER AUFGABE C VERWENDEN, HIER IST DIE AUFLISTUNG FREUER BOXENVERLANGT
+    public void printBpdispo(){ //NICH FUER AUFGABE C VERWENDEN, HIER IST DIE AUFLISTUNG FREIER BOXEN VERLANGT
         int i = 0;
         for(Bpd o : this.bpdispo){
             System.out.println("Index:  " + i);
@@ -292,8 +293,6 @@ public class Dispoverwaltung {
         }
 
         //Update der Box Tabelle
-
-        //FEHLER: BESTANDSNUMMER WIRD NUR AUF 0 GESETZT
         for(Box o : fullBoxList){
             SQL = "update box set vstat = 1, vbstnr = ? where vbnr = ?";
             ps = this.postgres.getConnection().prepareStatement(SQL);
@@ -331,7 +330,7 @@ public class Dispoverwaltung {
         }
     }
 
-    public void createDeliveryNoteFor(int bestnr)throws SQLException{
+    public DeliveryNote createDeliveryNoteFor(int bestnr)throws SQLException{
 
         Customer customer;
         Order order;
@@ -427,7 +426,7 @@ public class Dispoverwaltung {
 
         ps = this.postgres.getConnection().prepareStatement(SQL);
         ps.setInt(1, bestnr);
-        resultSet = ps.executeQuery(SQL);
+        resultSet = ps.executeQuery();
 
         while(resultSet.next()){
             alleLpos2boxes.addLast(new Lpos2box(
@@ -440,7 +439,9 @@ public class Dispoverwaltung {
         resultSet.close();
         ps.close();
 
-        SQL = "select b.vbtyp, count(b.vbtyp) as Anz\n" +
+
+        //Anzahl Boxen bestimmen
+        SQL = "select b.vbtyp, count(b.vbtyp) as anz\n" +
                 "from box b\n" +
                 "where vbstnr = ?\n" +
                 "group by b.vbtyp";
@@ -452,25 +453,31 @@ public class Dispoverwaltung {
 
         boxtypecounter = new Boxtypecounter();
 
-        if(resultSet.next()){
-           boxtypecounter.setAnzBoxFr(resultSet.getInt("anz"));
-        }
-        if(resultSet.next()){
-            boxtypecounter.setAnzBoxFw(resultSet.getInt("anz"));
-        }
-        if(resultSet.next()){
-            boxtypecounter.setAnzBoxOr(resultSet.getInt("anz"));
-        }
-        if(resultSet.next()){
-            boxtypecounter.setAnzBoxWp(resultSet.getInt("anz"));
+        while(resultSet.next()){
+
+            String typ = resultSet.getString("vbtyp");
+            int anz = resultSet.getInt("anz");
+
+            switch(typ){
+                case ("OR"):
+                    boxtypecounter.setAnzBoxOr(anz);
+                    break;
+                case ("FR"):
+                    boxtypecounter.setAnzBoxFr(anz);
+                    break;
+                case ("WP"):
+                    boxtypecounter.setAnzBoxWp(anz);
+                    break;
+                case ("FW"):
+                    boxtypecounter.setAnzBoxFw(anz);
+                    break;
+            }
         }
 
         DeliveryNote deliveryNote = new DeliveryNote(order, customer, alleBaestaende, alleLpos2boxes, alleBoxen, boxtypecounter);
 
-        deliveryNote.printToConole();
+        return deliveryNote;
 
-        deliveryNote.printToText();
-        
     }
 
 

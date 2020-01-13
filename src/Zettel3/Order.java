@@ -19,7 +19,7 @@ public class Order {
     @Override
     public String toString(){
         String s =
-                "\n\nBestelldaten:" +
+                "\n\n-----------Bestellung-----------" +
                 "\nBestellnummer:       " + this.bestnr +
                 "\nBestelldatum:        " + this.bestdat +
                 "\nKundennummer:        " + this.knr +

@@ -1,8 +1,8 @@
 package Zettel3;
 
 public class Customer {
-    String kname, ort, strasse;     //Attribute für Kunden
-    int plz, knr;
+    private String kname, ort, strasse;     //Attribute für Kunden
+    private int plz, knr;
 
     public Customer( int knr, String kname, String strasse, int plz, String ort) {
         this.kname = kname;
